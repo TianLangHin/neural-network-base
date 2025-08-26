@@ -4,6 +4,7 @@ import sys
 from activation import ReLU, Sigmoid
 from loss import BinaryCrossEntropy
 from model import Layer, NeuralNetwork
+from optimiser import AdamOptimiser, NaiveOptimiser
 from preprocessing import MinMaxScaler, load_dataset, train_test_split
 
 def main(seed: int):
@@ -20,13 +21,20 @@ def main(seed: int):
         Layer(1, Sigmoid())
     ]
 
+    loss_fn = BinaryCrossEntropy()
     nn = NeuralNetwork(in_features=x.shape[1], layers=layers, seed=seed)
+    optim = AdamOptimiser(nn, learning_rate=0.001)
 
-    y_pred = np.where(nn.forward(x_train) >= 0.5, 1, 0)
-    comparison = y_train == y_pred
-    accuracy = comparison.sum() / comparison.size
-
-    print('Accuracy:', accuracy)
+    for i in range(1000):
+        y_pred = nn.forward(x_train)
+        loss = loss_fn.compute(y_pred, y_train)
+        nn.backward(y_train, loss_fn)
+        optim.step()
+        if i % 100 == 0:
+            y_pred_test = np.where(nn.forward(x_test) >= 0.5, 1, 0)
+            comparison = y_test == y_pred_test
+            accuracy = comparison.sum() / comparison.size
+            print('Epoch', i + 1, 'Accuracy:', accuracy)
 
 if __name__ == '__main__':
     main(int(sys.argv[1]))

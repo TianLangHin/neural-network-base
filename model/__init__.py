@@ -57,13 +57,23 @@ class NeuralNetwork:
                 self.dl_da[i] = loss.gradient(y_pred, y_true).mean(axis=0).reshape(-1, 1)
             else:
                 self.dl_da[i] = self.w[i+1].T @ self.dl_dz[i+1]
-            activation = self.g[i]
+            activation = self.activations[i]
             self.dl_dz[i] = self.dl_da[i] * activation.gradient(self.z[i])
             if i == 0:
                 self.error_cache.weights_error[i] = self.dl_dz[i] @ self.x
             else:
                 self.error_cache.weights_error[i] = self.dl_dz[i] @ self.a[i-1].T
             self.error_cache.biases_error[i] = np.mean(self.dl_dz[i], axis=1).reshape(-1, 1)
+
+    def update(self, i: int, weight_update: List[np.ndarray], bias_update: List[np.ndarray]):
+        self.w[i] -= weight_update
+        self.b[i] -= bias_update
+
+    def get_num_layers(self) -> int:
+        return self.num_layers
+
+    def get_error_cache(self) -> BackwardErrorCache:
+        return self.error_cache
 
 def xavier_normal(
         rng: np.random.Generator,
