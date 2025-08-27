@@ -1,11 +1,18 @@
 from collections import namedtuple
-from typing import List
+from dataclasses import dataclass
+from typing import List, Tuple
 import numpy as np
 
 from loss import Loss
-from utils import AllParams, BackwardErrorCache, ParamSet
 
 Layer = namedtuple('Layer', ['neurons', 'activation'])
+ParamSet = List[np.ndarray]
+AllParams = Tuple[ParamSet, ParamSet]
+
+@dataclass
+class BackwardErrorCache:
+    weights_error: ParamSet
+    biases_error: ParamSet
 
 class NeuralNetwork:
     def __init__(self, *, in_features: int, layers: List[Layer], seed: int):

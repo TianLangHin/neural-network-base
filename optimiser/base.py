@@ -1,7 +1,6 @@
 from abc import ABC, abstractmethod
 
-from model import NeuralNetwork
-from utils import BackwardErrorCache
+from model import BackwardErrorCache, NeuralNetwork
 
 class Optimiser(ABC):
     @abstractmethod

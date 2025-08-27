@@ -1,6 +1,5 @@
-from model import NeuralNetwork
+from model import BackwardErrorCache, NeuralNetwork
 from optimiser.base import Optimiser
-from utils import BackwardErrorCache
 
 class NaiveOptimiser(Optimiser):
     def __init__(self, nn: NeuralNetwork, *, learning_rate: float):

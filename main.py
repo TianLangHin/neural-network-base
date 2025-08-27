@@ -3,11 +3,10 @@ import numpy as np
 import sys
 
 from activation import ReLU, Sigmoid
+from data import BatchLoader, MinMaxScaler, load_dataset, train_test_split
 from loss import BinaryCrossEntropy
 from model import Layer, NeuralNetwork
 from optimiser import AdamOptimiser, NaiveOptimiser
-from preprocessing import MinMaxScaler, load_dataset, train_test_split
-from utils import BatchLoader
 
 def accuracy(y_true: np.ndarray, y_pred: np.ndarray) -> float:
     comparison = y_true == np.where(y_pred >= 0.5, 1, 0)

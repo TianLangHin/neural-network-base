@@ -1,8 +1,7 @@
-from model import NeuralNetwork
-from optimiser.base import Optimiser
-from utils import BackwardErrorCache
-
 import numpy as np
+
+from model import BackwardErrorCache, NeuralNetwork
+from optimiser.base import Optimiser
 
 class AdamOptimiser(Optimiser):
     def __init__(
