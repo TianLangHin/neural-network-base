@@ -1,3 +1,4 @@
+import matplotlib.pyplot as plt
 import numpy as np
 import sys
 
@@ -6,6 +7,13 @@ from loss import BinaryCrossEntropy
 from model import Layer, NeuralNetwork
 from optimiser import AdamOptimiser, NaiveOptimiser
 from preprocessing import MinMaxScaler, load_dataset, train_test_split
+from utils import BatchLoader
+
+def accuracy(y_true: np.ndarray, y_pred: np.ndarray) -> float:
+    comparison = y_true == np.where(y_pred >= 0.5, 1, 0)
+    correct = comparison.sum()
+    total = comparison.size
+    return correct / total
 
 def main(seed: int):
     x, y_true = load_dataset()
@@ -21,20 +29,49 @@ def main(seed: int):
         Layer(1, Sigmoid())
     ]
 
+    lr = 0.001
+    batch_size = 32
+    epochs = 1000
+
     loss_fn = BinaryCrossEntropy()
     nn = NeuralNetwork(in_features=x.shape[1], layers=layers, seed=seed)
-    optim = AdamOptimiser(nn, learning_rate=0.001)
+    optim = AdamOptimiser(nn, learning_rate=lr)
+    batch_loader = BatchLoader(seed=seed)
 
-    for i in range(1000):
-        y_pred = nn.forward(x_train)
-        loss = loss_fn.compute(y_pred, y_train)
-        nn.backward(y_train, loss_fn)
-        optim.step()
+    train_loss_list = []
+    train_accuracy_list = []
+    test_loss_list = []
+    test_accuracy_list = []
+
+    for i in range(1, epochs + 1):
+        data_batches = batch_loader.load_batch(x_train, y_train, batch_size=batch_size, shuffle=True)
+        for x_batch, y_batch in data_batches:
+            loss = loss_fn.compute(nn.forward(x_batch), y_batch)
+            nn.backward(y_batch, loss_fn)
+            optim.step()
+
+        y_pred_train = nn.forward(x_train)
+        train_loss_list.append(loss_fn.compute(y_pred_train, y_train).mean())
+        train_accuracy_list.append(accuracy(y_train, y_pred_train))
+
+        y_pred_test = nn.forward(x_test)
+        test_loss_list.append(loss_fn.compute(y_pred_test, y_test).mean())
+        test_accuracy_list.append(accuracy(y_test, y_pred_test))
+
         if i % 100 == 0:
-            y_pred_test = np.where(nn.forward(x_test) >= 0.5, 1, 0)
-            comparison = y_test == y_pred_test
-            accuracy = comparison.sum() / comparison.size
-            print('Epoch', i + 1, 'Accuracy:', accuracy)
+            print(
+                'Epoch', '{: >4}'.format(i),
+                'completed:',
+                'Train:', '{:.2f}%'.format(100 * train_accuracy_list[-1]),
+                'Test:', '{:.2f}%'.format(100 * test_accuracy_list[-1]))
+
+    plt.figure()
+    plt.plot(range(1, epochs + 1), train_loss_list, test_loss_list)
+    plt.savefig('fig_loss.png')
+
+    plt.figure()
+    plt.plot(range(1, epochs + 1), train_accuracy_list, test_accuracy_list)
+    plt.savefig('fig_accuracy.png')
 
 if __name__ == '__main__':
     main(int(sys.argv[1]))

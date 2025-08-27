@@ -1,3 +1,6 @@
+# Ignoring any figures that are generated to visualise training.
+*.png
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
