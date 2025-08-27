@@ -3,7 +3,7 @@ import numpy as np
 import sys
 
 from activation import ReLU, Sigmoid
-from data import BatchLoader, MinMaxScaler, load_dataset, train_test_split
+from data import BatchLoader, MinMaxScaler, ZScoreScaler, load_dataset, train_test_split
 from loss import BinaryCrossEntropy
 from model import Layer, NeuralNetwork
 from optimiser import AdamOptimiser, NaiveOptimiser
@@ -31,6 +31,7 @@ def main(seed: int):
     lr = 0.001
     batch_size = 32
     epochs = 1000
+    interval = 50
 
     loss_fn = BinaryCrossEntropy()
     nn = NeuralNetwork(in_features=x.shape[1], layers=layers, seed=seed)
@@ -57,12 +58,14 @@ def main(seed: int):
         test_loss_list.append(loss_fn.compute(y_pred_test, y_test).mean())
         test_accuracy_list.append(accuracy(y_test, y_pred_test))
 
-        if i % 100 == 0:
+        if i % interval == 0:
             print(
                 'Epoch', '{: >4}'.format(i),
                 'completed:',
                 'Train:', '{:.2f}%'.format(100 * train_accuracy_list[-1]),
-                'Test:', '{:.2f}%'.format(100 * test_accuracy_list[-1]))
+                'Loss({:.4f})'.format(train_loss_list[-1]),
+                'Test:', '{:.2f}%'.format(100 * test_accuracy_list[-1]),
+                'Loss({:.4f})'.format(test_loss_list[-1]),)
 
     plt.figure()
     plt.plot(range(1, epochs + 1), train_loss_list, test_loss_list)
