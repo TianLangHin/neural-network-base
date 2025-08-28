@@ -4,15 +4,10 @@ import sys
 
 from activation import ReLU, Sigmoid
 from data import BatchLoader, MinMaxScaler, ZScoreScaler, load_dataset, train_test_split
+from evaluation.metrics import accuracy, f1_score, precision, recall
 from loss import BinaryCrossEntropy
 from model import Layer, NeuralNetwork
 from optimiser import AdamOptimiser, NaiveOptimiser
-
-def accuracy(y_true: np.ndarray, y_pred: np.ndarray) -> float:
-    comparison = y_true == np.where(y_pred >= 0.5, 1, 0)
-    correct = comparison.sum()
-    total = comparison.size
-    return correct / total
 
 def main(seed: int):
     x, y_true = load_dataset()
@@ -66,6 +61,12 @@ def main(seed: int):
                 'Loss({:.4f})'.format(train_loss_list[-1]),
                 'Test:', '{:.2f}%'.format(100 * test_accuracy_list[-1]),
                 'Loss({:.4f})'.format(test_loss_list[-1]),)
+
+    y_pred_test = nn.forward(x_test)
+    print('Final Accuracy:  {:.2f}%'.format(100 * accuracy(y_test, y_pred_test)))
+    print('Final Precision: {:.2f}%'.format(100 * precision(y_test, y_pred_test)))
+    print('Final Recall:    {:.2f}%'.format(100 * recall(y_test, y_pred_test)))
+    print('Final F1-Score:  {:.2f}%'.format(100 * f1_score(y_test, y_pred_test)))
 
     plt.figure()
     plt.plot(range(1, epochs + 1), train_loss_list, test_loss_list)
