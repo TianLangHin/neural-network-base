@@ -45,7 +45,7 @@ class NeuralNetwork:
             weights_error=[0] * self.num_layers,
             biases_error=[0] * self.num_layers)
 
-    def forward(self, x) -> np.ndarray:
+    def forward(self, x: np.ndarray) -> np.ndarray:
         activation = self.activations[0]
         self.x = x
         self.z[0] = self.w[0] @ x.T + self.b[0]
